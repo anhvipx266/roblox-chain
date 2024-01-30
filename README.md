@@ -1,29 +1,31 @@
+- **version: 1.0**
 ## Chain
 - Là một tập các Chuỗi xích lệnh, giúp đưa logic mã về dạng chuỗi
+- *Là Object có cấu trúc tương tự nhau, clone từ Chain - Main Class*
 
 ## Sử dụng
-- Tạo các VFX Class(nên kế thừa IVFX và lấy mẫu từ Proto) và đặt trong VFXs Folder
-- VFX trong Folder VFXs tự động được đăng ký
+- Gọi và kết nối function và tham số nối tiếp nhau(thuận tiện khi gọi bằng hàm viết tắt - short function)
+- function được kết nối *luôn* được truyền cùng đầu tiên tương tự ```this```
+- Kết quả của *mắt xích này* sẽ là được **bổ sung** vào tham số của *mắt xích sau*
 ```lua
--- client
-VFXSystem:Make({
-    ClassName = "VFX ClassName",
-    Position = Vector3.new(), -- chỉ định cụ thể hoặc mặc định Camera Position
-    --... -- dữ liệu kèm theo của VFX
-})
+Chain:run(function()
+    print("Running!")
+end):run(function()
+    print("And then!")
+end)
 ```
+- **Thứ tự tham số**: ```<this> [tham số chính] <lỗi> [tham số kết quả trước]```
 ```lua
--- server
-VFXSystem:Make({
-    ClassName = "VFX ClassName",
-    Position = Vector3.new(), -- bắt buộc chỉ định cụ thể
-    --... -- dữ liệu kèm theo của VFX
-})
+Chain:run(function(this, para1)
+    print("Running!", para1) --> 10
+    return "Result"
+end, 10):run(function(this, para2, err, result1)
+    print("And then!")
+    print(para2, result1) --> 20, "Result"
+end, 20)
+- *Lưu ý khi sử dụng ```spawn```: hàm kết nối nên tiêu tốn 1 chút thời gian nếu không các mắt xích phía sau sẽ không kịp được kết nối*
 ```
 ## Cài đặt - Settings
 ```lua
-export type VFXSettings = {
-    RenderDistance:number, -- khoảng cách mô phỏng VFX
-    ServerRender:boolean, -- xác định server mô phỏng vfx thay thế cho fire dữ liệu
-}
+
 ```

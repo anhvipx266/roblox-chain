@@ -8,6 +8,8 @@ Chain.__tostring = function(self) return self.ClassName end
 Chain.ClassName = 'Chain'
 Chain.ShortName = 'm'
 Chain.all = {}
+
+local strs = "run spawn try defer delay"
 --/utils
 -- tìm chuỗi - Chain với tên nếu cần
 function Chain:chain(chain)
@@ -19,29 +21,16 @@ end
 
 function Chain:toRemember(chain)
     chain.nxts = {}
-    function chain:run(...)
-        table.insert(chain.nxts, {'run', ...})
-        return chain
-    end
-    function chain:spawn(...)
-        table.insert(chain.nxts, {'spawn', ...})
-        return chain
-    end
-    function chain:try(...)
-        table.insert(chain.nxts, {'try', ...})
-        return chain
-    end
-    function chain:runBlend(...)
-        table.insert(chain.nxts, {'runBlend', ...})
-        return chain
-    end
-    function chain:spawnBlend(...)
-        table.insert(chain.nxts, {'spawnBlend', ...})
-        return chain
-    end
-    function chain:tryBlend(...)
-        table.insert(chain.nxts, {'tryBlend', ...})
-        return chain
+    for _, strf in strs:split(' ') do
+        chain[strf] = function(self, ...)
+            table.insert(chain.nxts, {strf, ...})
+            return chain
+        end
+        local bstrf = strf..'Blend'
+        chain[bstrf] = function(self, ...)
+            table.insert(chain.nxts, {bstrf, ...})
+            return chain
+        end
     end
 end
 
@@ -56,23 +45,14 @@ function Chain:pack(_chain, sp, _f, ...)
         _chain:toRemember(chain)
     else
         -- trả về bao đóng kèm dữ liệu kết quả, lỗi
-        function chain:run(f, ...)
-            return _chain:run(f, ..., chain.err, unpack(result))
-        end
-        function chain:spawn(f, ...)
-            return _chain:spawn(f, ..., chain.err, unpack(result))
-        end
-        function chain:try(f, ...)
-            return _chain:try(f, ..., chain.err, unpack(result))
-        end
-        function chain:runBlend(blend, f, ...)
-            return _chain:runBlend(blend, f, ..., chain.err, unpack(result))
-        end
-        function chain:spawnBlend(blend, f, ...)
-            return _chain:spawnBlend(blend, f, ..., chain.err, unpack(result))
-        end
-        function chain:tryBlend(blend, f, ...)
-            return _chain:tryBlend(blend, f, ..., chain.err, unpack(result))
+        for _, strf in strs:split(' ') do
+            chain[strf] = function(self, f, ...)
+                return _chain[strf](_chain, f, ..., chain.err, unpack(result))
+            end
+            local bstrf = strf..'Blend'
+            chain[bstrf] = function(self, blend, f, ...)
+                return _chain[bstrf](_chain, blend, f, ..., chain.err, unpack(result))
+            end
         end
     end
     -- short function
@@ -82,7 +62,9 @@ function Chain:pack(_chain, sp, _f, ...)
     chain.rb = chain.runBlend
     chain.sb = chain.spawnBlend
     chain.tb = chain.tryBlend
-
+    chain.dl = chain.delay
+    chain.df = chain.defer
+    -- Chain và function được đóng gói
     return chain, function()
         result = table.pack(_f(_f, unpack(para)))
         if chain.nxts then
@@ -90,7 +72,7 @@ function Chain:pack(_chain, sp, _f, ...)
             local nchain = _chain
             for i, nxt in chain.nxts do
                 local fstr, f = nxt[1], nxt[2]
-                nchain = nchain[fstr](f, unpack(nxt, 3), chain.err, unpack(result))
+                nchain = nchain[fstr](nchain, f, unpack(nxt, 3), chain.err, unpack(result))
             end
         end
     end
@@ -123,8 +105,31 @@ function Chain:spawnBlend(blend, f, ...)
     blend = self:chain(blend)
     return blend:spawn(f, ...)
 end
+-- hoãn lại - defer một Chuỗi - Chain
+function Chain:defer(...)
+     -- Chuỗi - Chain được đóng gói lại
+     local chain, _f = Chain:wrap(true, ...)
+     task.defer(_f)
+     return chain
+end
+-- hoãn lại kết hợp một Chuỗi - Chain
+function Chain:deferBlend(blend, f, ...)
+    blend = self:chain(blend)
+    return blend:defer(f, ...)
+end
+-- trì hoãn - delay một Chuỗi - Chain
+function Chain:delay(sec ,...)
+    -- Chuỗi - Chain được đóng gói lại
+    local chain, _f = Chain:wrap(true, ...)
+    task.delay(sec, _f)
+end
+-- trì hoãn kết hợp một Chuỗi - Chain
+function Chain:delayBlend(blend, sec, f, ...)
+    blend = self:chain(blend)
+    return blend:delay(sec, f, ...)
+end
 -- thử một Chuỗi - Chain
-function Chain:try(f, ...)
+function Chain:try(...)
     -- Chuỗi - Chain được đóng gói lại
     local chain, _f = Chain:wrap(false, ...)
     local success, err = pcall(_f)
@@ -145,5 +150,7 @@ Chain.t = Chain.try
 Chain.rb = Chain.runBlend
 Chain.sb = Chain.spawnBlend
 Chain.tb = Chain.tryBlend
+Chain.dl = Chain.delay
+Chain.df = Chain.defer
 
 return setmetatable({}, Chain)
