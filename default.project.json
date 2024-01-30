@@ -1,0 +1,14 @@
+{
+  "name": "Chain",
+  "tree": {
+    "$className": "DataModel",
+
+    
+    "ReplicatedStorage": {
+      "Chain" :{
+        "$path": "src",
+        "$ignoreUnknownInstances": true
+      }
+    }
+  }
+}
