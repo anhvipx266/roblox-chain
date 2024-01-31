@@ -1,4 +1,4 @@
-- **version: 1.0**
+- **version: 2.0**
 ## Chain
 - Là một tập các Chuỗi xích lệnh, giúp đưa logic mã về dạng chuỗi
 - *Là Object có cấu trúc tương tự nhau, clone từ Chain - Main Class*
@@ -12,7 +12,7 @@ Chain:run(function()
     print("Running!")
 end):run(function()
     print("And then!")
-end)
+end):start()
 ```
 - **Thứ tự tham số**: ```<this> [tham số chính] <lỗi> [tham số kết quả trước]```
 ```lua
@@ -22,8 +22,7 @@ Chain:run(function(this, para1)
 end, 10):run(function(this, para2, err, result1)
     print("And then!")
     print(para2, result1) --> 20, "Result"
-end, 20)
-- *Lưu ý khi sử dụng ```spawn```: hàm kết nối nên tiêu tốn 1 chút thời gian nếu không các mắt xích phía sau sẽ không kịp được kết nối*
+end, 20):start()
 ```
 ## Cài đặt - Settings
 ```lua
