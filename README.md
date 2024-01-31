@@ -1,4 +1,4 @@
-- **version: 2.0**
+- **version: 2.0.1**
 ## Chain
 - Là một tập các Chuỗi xích lệnh, giúp đưa logic mã về dạng chuỗi
 - *Là Object có cấu trúc tương tự nhau, clone từ Chain - Main Class*
