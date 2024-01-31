@@ -1,5 +1,40 @@
+export type ChainFunction = (self:Chain, f:any, any...)->(Chain, Chain)
+export type ChainBlendFunction = (self:Chain, blend:Chain|string, f:any, any...)->(Chain, Chain)
+export type WrapFunction = (this:WrapFunction, any...)->(any...)
 export type Chain = {
-
+    find:(self:Chain, chain:Chain|string)->Chain,
+    new:(self:Chain)->Chain,
+    get:(self:Chain)->Chain,
+    start:(self:Chain)->(),
+    param:(self:Chain, any...)->(WrapFunction, any...),
+    chain:(self:Chain, class:Chain, tp:string, f:any, any...)->(Chain, Chain),
+    run:ChainFunction,
+    runBlend:ChainBlendFunction,
+    spawn:ChainFunction,
+    spawnBlend:ChainBlendFunction,
+    defer:ChainFunction,
+    deferBlend:ChainBlendFunction,
+    delay:ChainFunction,
+    delayBlend:(self:Chain, blend:Chain|string, sec:number, f:any, any...)->(Chain, Chain),
+    try:ChainFunction,
+    tryBlend:ChainBlendFunction,
+    event:(self:Chain, signal:RBXScriptSignal, fcn:any, f:any, any...)->(Chain, Chain),
+    eventBlend:(self:Chain, blend:Chain|string, signal:RBXScriptSignal, fcn:any, f:any, any...)->(Chain, Chain),
+    exec:(self:Chain, last:Chain)->(),
+    -- short function
+    st:(self:Chain)->(),
+    r:ChainFunction,
+    rb:ChainBlendFunction,
+    s:ChainFunction,
+    sb:ChainBlendFunction,
+    df:ChainFunction,
+    dfb:ChainBlendFunction,
+    dl:ChainFunction,
+    dlb:(self:Chain, blend:Chain|string, sec:number, f:any, any...)->(Chain, Chain),
+    t:ChainFunction,
+    tb:ChainBlendFunction,
+    e:(self:Chain, signal:RBXScriptSignal, fcn:any, f:any, any...)->(Chain, Chain),
+    eb:(self:Chain, blend:Chain|string, signal:RBXScriptSignal, fcn:any, f:any, any...)->(Chain, Chain),
 }
 
 local __prototype = {}
@@ -14,19 +49,19 @@ Chain.all = {}
 local strs = "run spawn try defer delay"
 --/utils
 -- tìm chuỗi - Chain với tên nếu cần
-function Chain:find(chain)
+function Chain:find(chain:Chain|string):Chain
     if type(chain) == "string" then
         chain = self.all[chain]
     end
     return chain
 end
-function Chain:new()
+function Chain:new():Chain
     local new = setmetatable({}, getmetatable(self))
     new.List = {}
     return new
 end
 -- trả lại hoặc tạo mới
-function Chain:get(...):Chain
+function Chain:get():Chain
     if self ~= self.__prototype then return self end
     return self:new()
 end
@@ -42,7 +77,7 @@ function Chain:param(...):((any...)->(any...), any...)
     return ...
 end
 -- lưu trữ/kết nối Chain
-function Chain:chain(class, tp, f, ...)
+function Chain:chain(class, tp, f, ...):(Chain, Chain)
     -- tạo hoặc lấy chain hiện tại
     local chain = self:get()
     -- chain gần nhất được thêm vào
@@ -57,51 +92,51 @@ function Chain:chain(class, tp, f, ...)
     return chain, new
 end
 -- chạy Chain
-function Chain:run(f, ...):Chain
+function Chain:run(f, ...):(Chain, Chain)
     return self:chain(nil, 'run', f, ...)
 end
-function Chain:runBlend(blend, f, ...):Chain
+function Chain:runBlend(blend, f, ...):(Chain, Chain)
     local class = self:find(blend)
     return self:chain(class, 'run', f, ...)
 end
 -- sinh - spawn Chain
-function Chain:spawn(f, ...)
+function Chain:spawn(f, ...):(Chain, Chain)
     return self:chain(nil, 'spawn', f, ...)
 end
-function Chain:spawnBlend(blend, f, ...):Chain
+function Chain:spawnBlend(blend, f, ...):(Chain, Chain)
     local class = self:find(blend)
     return self:chain(class, 'spawn', f, ...)
 end
 -- hoãn lại - defer Chain
-function Chain:defer(f, ...)
+function Chain:defer(f, ...):(Chain, Chain)
     return self:chain(nil, 'defer', f, ...)
 end
-function Chain:deferBlend(blend, f, ...):Chain
+function Chain:deferBlend(blend, f, ...):(Chain, Chain)
     local class = self:find(blend)
     return self:chain(class, 'defer', f, ...)
 end
 -- trì hoãn - delay Chain
-function Chain:delay(sec, f, ...)
+function Chain:delay(sec, f, ...):(Chain, Chain)
     local chain, new = self:chain(nil, 'delay', f, ...)
     new.Sec = sec -- lưu trữ thời gian delay
     return chain, new
 end
-function Chain:delayBlend(blend, sec, f, ...):Chain
+function Chain:delayBlend(blend, sec, f, ...):(Chain, Chain)
     local class = self:find(blend)
     local chain, new = self:chain(class, 'delay', f, ...)
     new.Sec = sec -- lưu trữ thời gian delay
     return chain, new
 end
 -- thử - try Chain
-function Chain:try(f, ...)
+function Chain:try(f, ...):(Chain, Chain)
     return self:chain(nil, 'try', f, ...)
 end
-function Chain:tryBlend(blend, f, ...):Chain
+function Chain:tryBlend(blend, f, ...):(Chain, Chain)
     local class = self:find(blend)
     return self:chain(class, 'try', f, ...)
 end
 -- kết nối tín hiệu - event/Signal Chain
-function Chain:event(signal, fcn, f, ...)
+function Chain:event(signal, fcn, f, ...):(Chain, Chain)
     local chain, new = self:chain(nil, 'event', f, ...)
 	-- kết nối tín hiệu
 	fcn(signal, function(...)
@@ -115,7 +150,7 @@ function Chain:event(signal, fcn, f, ...)
     end)
 	return chain, new
 end
-function Chain:eventBlend(blend, signal, fcn, f, ...):Chain
+function Chain:eventBlend(blend, signal, fcn, f, ...):(Chain, Chain)
     local class = self:find(blend)
     local chain, new = self:chain(class, 'event', f, ...)
 	-- kết nối tín hiệu
@@ -131,7 +166,7 @@ function Chain:eventBlend(blend, signal, fcn, f, ...):Chain
 	return chain, new
 end
 -- thực thi Chain
-function Chain:exec(last)
+function Chain:exec(last:Chain)
     local lastResult = last.Result or {}
     local lastErr = last.Err
     local params = self.Params
@@ -171,6 +206,7 @@ function Chain:exec(last)
 end
 --------------------------------------------------------------------------
 -- short function
+Chain.st = Chain.start
 Chain.r = Chain.run
 Chain.s = Chain.spawn
 Chain.t = Chain.try
@@ -179,8 +215,7 @@ Chain.sb = Chain.spawnBlend
 Chain.tb = Chain.tryBlend
 Chain.dl = Chain.delay
 Chain.df = Chain.defer
-Chain.st = Chain.start
 Chain.e = Chain.event
 Chain.eb = Chain.eventBlend
 
-return setmetatable(__prototype, Chain)
+return setmetatable(__prototype, Chain)::Chain

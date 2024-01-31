@@ -1,9 +1,15 @@
 --[[
     Chuỗi tạo, chạy Tween Instance
 ]]
+
 local ts = game:GetService("TweenService")
 
 local Chain = require(script.Parent.Chain)
+export type Tween = Chain.Chain & {
+    param:(ins:Instance, mayInfo:TweenInfo, mayTo:{}, callback:any, onCompleted:any, any...)->(any, any...),
+    param:(ins:Instance, time:number?, style:Enum.EasingStyle?,
+        dir:Enum.EasingDirection?, any..., callback:any, onCompleted:any, any...)->(any, any...),
+}
 
 local __prototype = {}
 local Tween = table.clone(getmetatable(Chain))
@@ -17,16 +23,13 @@ function Tween:param(ins:Instance, mayInfo, mayTo, ...)
     local para = table.pack(mayInfo, mayTo, ...)
     local info, to, idx
     if typeof(mayInfo) == "TweenInfo" then
-        info = mayInfo
-        to = mayTo
+        info = mayInfo; to = mayTo;
     else
         -- tạo info từ chuỗi para trước to - table
         for i = 1, para.n do
             idx = i
             if type(para[i]) == "table" then
-                to = para[i]
-                info = TweenInfo.new(unpack(para, 1, i - 1))
-                break
+                to = para[i]; info = TweenInfo.new(unpack(para, 1, i - 1)); break;
             end
         end
     end
@@ -40,10 +43,10 @@ function Tween:param(ins:Instance, mayInfo, mayTo, ...)
         tw.Completed:Wait()
         if callback then
             assert(type(callback) == "function", 'Callback must be function, got ' .. typeof(callback))
-            callback(ins, tw, info, to)
+            callback(ins, tw, info, to, ...)
         end
     end
     return f2, para[idx + 1], para[idx + 2]
 end
 
-return setmetatable(__prototype, Tween)
+return setmetatable(__prototype, Tween)::Tween

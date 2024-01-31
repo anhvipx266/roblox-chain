@@ -1,4 +1,4 @@
-- **version: 2.0.2**
+- **version: 2.0.3**
 ## Chain
 - Là một tập các Chuỗi xích lệnh, giúp đưa logic mã về dạng chuỗi
 - *Là Object có cấu trúc tương tự nhau, clone từ Chain - Main Class*
@@ -63,22 +63,45 @@ tryBlend(blend:string|Chain, f, ...) -- tb, tryBlend
 eventBlend(blend:string|Chain, signal:Signal, fcn, f, ...) -- eb, eventBlend
 ```
 ### Event - Xử lý Sự kiện, Tín hiệu
-- D
 ```lua
--- Bắt đầu/ khởi động
-start() -- st, start
--- Kết nối Chuỗi - Chain
-run(f, ...) -- r, run
-spawn(f, ...) -- s, spawn
-defer(f, ...) -- df, defer
-delay(sec, f, ...) -- dl, delay
-try(f, ...) -- t, try
-event(signal:Signal, fcn, f, ...) -- e, event
--- Kết hợp - Blend
-runBlend(blend:string|Chain, f, ...) -- rb, runBlend
-spawnBlend(blend:string|Chain, f, ...) -- sb, spawnBlend
-deferBlend(blend:string|Chain, f, ...) -- dfb, deferBlend
-delayBlend(blend:string|Chain, sec, f, ...) -- dlb, delayBlend
-tryBlend(blend:string|Chain, f, ...) -- tb, tryBlend
-eventBlend(blend:string|Chain, signal:Signal, fcn, f, ...) -- eb, eventBlend
+Connect(signal, f, ...)
+```
+- Các phương thức khác tương tự
+```lua
+-- short function
+Event.cn = Event.Connect
+Event.connect = Event.Connect
+Event.once = Event.Once
+Event.cnp = Event.ConnectParallel
+Event.connectParallel = Event.ConnectParallel
+
+Event.cnb = Event.ConnectBlend
+Event.connectBlend = Event.ConnectBlend
+Event.onceb = Event.OnceBlend
+Event.onceBlend = Event.OnceBlend
+Event.cnpb = Event.ConnectParallelBlend
+Event.connectParallelBlend = Event.ConnectParallelBlend
+```
+### Tween - Chuỗi Tween Instance
+- TweenInfo có thể được tự khớp với EnumItem
+- *Các tham số phía sau info là **callback**, và **onCompleted** được tự khớp
+- Tween được chờ đợi đến khi **Hoàn thành**
+```lua
+run(ins:Instance, mayInfo:TweenInfo, mayTo:{}, callback, onCompleted, ...)
+run(ins:Instance, time:number?, style:EasingStyle?, dir:EasingDirection?, ..., callback, onCompleted, ...)
+```
+### TweenUI - Chuỗi Tween cho GuiObject
+- Tween lấy *tham số cuối* làm **tham số Tween**. *Lưu ý khi sử dụng đối số của **callback*** 
+- Các tham số được tự động khớp
+- Tween được chờ đợi đến khi **Hoàn thành**
+```lua
+run(gui:GuiObject, strf:string, ...)
+strf: Chuỗi hàm Tween: TweenSize, TweenPosition, TweenSizeAndPosition
+    Có thể bỏ qua "Tween" hoặc viết tắt.
+```
+```lua
+-- short string function
+TweenSize: size, Size, s
+TweenPosition: pos, Position, p, position
+TweenSizeAndPosition: sizeAndPos, sizeAndPosition, sizePos, sp, ps, posSize, positionAndSize, posAndSize
 ```

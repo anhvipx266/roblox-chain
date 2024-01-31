@@ -5,6 +5,9 @@
     VD trong Proto là function sẽ wrap trong 1 function ảo print("Proto Chain")
 ]]
 local Chain = require(script.Parent.Chain)
+export type Proto = Chain.Chain & {
+    param:(self:Proto, f:any, any...)->(any, any...)
+}
 
 local __prototype = {}
 local Proto = table.clone(getmetatable(Chain))
@@ -23,4 +26,4 @@ function Proto:param(f, ...)
     return f2, ...
 end
 
-return setmetatable(__prototype, Proto)
+return setmetatable(__prototype, Proto)::Proto
