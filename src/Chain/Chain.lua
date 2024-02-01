@@ -37,6 +37,8 @@ export type Chain = {
     eb:(self:Chain, blend:Chain|string, signal:RBXScriptSignal, fcn:any, f:any, any...)->(Chain, Chain),
 }
 
+local Option = require(script.Parent.Option)
+
 local __prototype = {}
 local Chain = {}
 Chain.__index = Chain
@@ -145,7 +147,7 @@ function Chain:event(signal, fcn, f, ...):(Chain, Chain)
 		local lastErr = last.Err
 		local params = new.Params
 		assert(type(f) == "function", "First params must be function, got " .. typeof(f))
-        new.Result = {f(f, ..., unpack(params, 2), lastErr, unpack(lastResult))}
+        self.Result = {f(unpack(self:pack(last, table.pack(...))))}
         new:start()
     end)
 	return chain, new
@@ -160,39 +162,53 @@ function Chain:eventBlend(blend, signal, fcn, f, ...):(Chain, Chain)
 		local lastErr = last.Err
 		local params = new.Params
 		assert(type(f) == "function", "First params must be function, got " .. typeof(f))
-        new.Result = {f(f, ..., unpack(params, 2), lastErr, unpack(lastResult))}
+        self.Result = {f(unpack(self:pack(last, table.pack(...))))}
         new:start()
     end)
 	return chain, new
 end
--- thực thi Chain
-function Chain:exec(last:Chain)
+-- pack params
+function Chain:pack(last, evPara):{}
     local lastResult = last.Result or {}
     local lastErr = last.Err
+    local params = self.Params
+    if #lastResult == 0 then lastResult = {Option.None} end
+    if #params == 1 then table.insert(params, Option.None) end
+    if evPara and #evPara == 0 then evPara = {Option.None} end
+    if not lastErr then lastErr = Option.None end
+    local _params, idx = {}, 1;
+    if evPara then for _, v in evPara do _params[idx] = v; idx += 1; end end
+    for _, v in params do _params[idx] = v; idx += 1; end
+    _params[idx] = lastErr; idx += 1;
+    for _, v in lastResult do _params[idx] = v; idx += 1; end
+    return _params
+end
+-- thực thi Chain
+function Chain:exec(last:Chain)
     local params = self.Params
     local f = params[1]
     assert(type(f) == "function", "First params must be function, got " .. typeof(f))
     if self.Type == 'run' then
-        self.Result = {f(f, unpack(params, 2), lastErr, unpack(lastResult))}
+        self.Result = {f(unpack(self:pack(last)))}
         self:start()
     elseif self.Type == 'spawn' then
         task.spawn(function()
-            self.Result = {f(f, unpack(params, 2), lastErr, unpack(lastResult))}
+            self.Result = {f(unpack(self:pack(last)))}
             self:start()
         end)
     elseif self.Type == 'defer' then
         task.defer(function()
-            self.Result = {f(f, unpack(params, 2), lastErr, unpack(lastResult))}
+            self.Result = {f(unpack(self:pack(last)))}
             self:start()
         end)
     elseif self.Type == 'delay' then
         task.delay(self.Sec, function()
-            self.Result = {f(f, unpack(params, 2), lastErr, unpack(lastResult))}
+            self.Result = {f(unpack(self:pack(last)))}
             self:start()
         end)
     elseif self.Type == 'try' then
         local s, err = pcall(function()
-            self.Result = {f(f, unpack(params, 2), lastErr, unpack(lastResult))}
+            self.Result = {f(unpack(self:pack(last)))}
         end)
         if not s then
             self.Err = err

@@ -1,8 +1,10 @@
-- **version: 2.0.3**
+- **version: 2.0.4**
 ## Chain
 - Là một tập các Chuỗi xích lệnh, giúp đưa logic mã về dạng chuỗi
 - *Là Object có cấu trúc tương tự nhau, clone từ Chain - Main Class*
-
+## Utils - Nguồn được sử dụng cùng
+- ```Option = "sleitnick/option@1.0.5"```
+- ```CompositeAnimation = "anhvipx266/CompositeAnimation@1.0.1"```
 ## Sử dụng
 - Gọi và kết nối function và tham số nối tiếp nhau(thuận tiện khi gọi bằng hàm viết tắt - short function)
 - function được kết nối *luôn* được truyền cùng đầu tiên tương tự ```this```
@@ -14,9 +16,9 @@ end):run(function()
     print("And then!")
 end):start()
 ```
-- **Thứ tự tham số**: ```<this> <tham số chính> <lỗi> <tham số kết quả trước>
+- **Thứ tự tham số**: ```<this> <tham số chính|Option.None> <lỗi|Option.None> <tham số kết quả trước|Option.None>
 - ```VD: this, ev..., err, result...```
-- **Thứ tự tham số tín hiệu - Signal**: ```<this> <tham số tín hiệu> <tham số chính> <lỗi> <tham số kết quả trước>```
+- **Thứ tự tham số tín hiệu - Signal**: ```<this> <tham số tín hiệu|Option.None> <tham số chính|Option.None> <lỗi> <tham số kết quả trước|Option.None>```
 - ```VD: this, ev..., para..., err, result...```
 ```lua
 Chain:run(function(this, para1)
@@ -91,6 +93,21 @@ run(ins:Instance, mayInfo:TweenInfo, mayTo:{}, callback, onCompleted, ...)
 run(ins:Instance, time:number?, style:EasingStyle?, dir:EasingDirection?, ..., callback, onCompleted, ...)
 ```
 ### TweenUI - Chuỗi Tween cho GuiObject
+- Tween lấy *tham số cuối* làm **tham số Tween**. *Lưu ý khi sử dụng đối số của **callback*** 
+- Các tham số được tự động khớp
+- Tween được chờ đợi đến khi **Hoàn thành**
+```lua
+run(gui:GuiObject, strf:string, ...)
+strf: Chuỗi hàm Tween: TweenSize, TweenPosition, TweenSizeAndPosition
+    Có thể bỏ qua "Tween" hoặc viết tắt.
+```
+```lua
+-- short string function
+TweenSize: size, Size, s
+TweenPosition: pos, Position, p, position
+TweenSizeAndPosition: sizeAndPos, sizeAndPosition, sizePos, sp, ps, posSize, positionAndSize, posAndSize
+```
+### TweenFunction - Chuỗi Tween cho GuiObject
 - Tween lấy *tham số cuối* làm **tham số Tween**. *Lưu ý khi sử dụng đối số của **callback*** 
 - Các tham số được tự động khớp
 - Tween được chờ đợi đến khi **Hoàn thành**

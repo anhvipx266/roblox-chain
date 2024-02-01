@@ -8,7 +8,7 @@ local Chain = require(script.Parent.Chain)
 export type Tween = Chain.Chain & {
     param:(ins:Instance, mayInfo:TweenInfo, mayTo:{}, callback:any, onCompleted:any, any...)->(any, any...),
     param:(ins:Instance, time:number?, style:Enum.EasingStyle?,
-        dir:Enum.EasingDirection?, any..., callback:any, onCompleted:any, any...)->(any, any...),
+        dir:Enum.EasingDirection?, any, callback:any, onCompleted:any, any...)->(any, any...),
 }
 
 local __prototype = {}
