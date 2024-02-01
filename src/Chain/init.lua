@@ -6,6 +6,7 @@ local Chain = {}
 local function load(v: ModuleScript)
 	if not v:IsA("ModuleScript") then return end
 	local class = require(v)
+    if typeof(class) ~= "table" or (not class.IsChain) then return end
 	Chain[v.Name] = class
     MainChain.all[v.Name] = class
     if class.ShortName then

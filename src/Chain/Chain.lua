@@ -46,6 +46,7 @@ Chain.__tostring = function(self) return self.ClassName end
 Chain.__prototype = __prototype
 Chain.ClassName = 'Chain'
 Chain.ShortName = 'm'
+Chain.IsChain = true
 Chain.all = {}
 
 local strs = "run spawn try defer delay"
